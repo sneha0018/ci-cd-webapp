@@ -19,10 +19,14 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          port: 22
           script: |
-           cd ci-cd-webapp || git clone https://github.com/sneha0018/ci-cd-webapp.git && cd ci-cd-webapp
-           docker stop cicd || true
-           docker rm cicd || true
-           docker build -t cicd-webapp .
-           docker run -d -p 80:80 --name cicd cicd-webapp
-
+            cd /home/ec2-user || exit 1
+            if [ ! -d "ci-cd-webapp" ]; then
+              git clone https://github.com/sneha0018/ci-cd-webapp.git
+            fi
+            cd ci-cd-webapp
+            docker stop cicd || true
+            docker rm cicd || true
+            docker build -t cicd-webapp .
+            docker run -d -p 80:80 --name cicd cicd-webapp
