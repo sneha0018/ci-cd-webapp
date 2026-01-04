@@ -13,15 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Decode SSH key
+        run: |
+          echo "${{ secrets.EC2_KEY_BASE64 }}" | base64 -d > key.pem
+          chmod 600 key.pem
+
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          port: 22
-          script: |
-            cd /home/ec2-user || exit 1
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ec2-user
             if [ ! -d "ci-cd-webapp" ]; then
               git clone https://github.com/sneha0018/ci-cd-webapp.git
             fi
@@ -30,3 +30,4 @@ jobs:
             docker rm cicd || true
             docker build -t cicd-webapp .
             docker run -d -p 80:80 --name cicd cicd-webapp
+          EOF
