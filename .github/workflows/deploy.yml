@@ -20,7 +20,9 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            docker stop cicd || true
-            docker rm cicd || true
-            docker build -t cicd-webapp .
-            docker run -d -p 80:80 --name cicd cicd-webapp
+           cd ci-cd-webapp || git clone https://github.com/sneha0018/ci-cd-webapp.git && cd ci-cd-webapp
+           docker stop cicd || true
+           docker rm cicd || true
+           docker build -t cicd-webapp .
+           docker run -d -p 80:80 --name cicd cicd-webapp
+
